@@ -1,19 +1,19 @@
-% Implement RULE 1 for a flock matrix: Alignment.
+% Implement RULE 3 for a school matrix: Alignment.
 % The resulting update matrix has zeros in the first two columns.
 %
 % Arguments:
-% flock   Nx4 matrix of flock positions and velocities
-% R       Radius of neighborhood to consider in alignment
+% school   Nx4 matrix of school positions and velocities
+% R        Radius of neighborhood to consider in alignment
 %
 % Returns:
 % update  Nx4 matrix with neighborhood average velocity update in columns 3 and 4
 %
-% Samuli Siltanen January 2019
+% Samuli Siltanen January 2021
 
-function update = FlockUpdateRule1(flock,R)
+function update = FishRule3(school,R)
 
-% Record number of fish in the flock
-Nfish = size(flock,1);
+% Record number of fish in the school
+Nfish = size(school,1);
 
 % Initialize update
 update = zeros(Nfish,4);
@@ -21,7 +21,7 @@ update = zeros(Nfish,4);
 % Loop over fish
 for jjj = 1:Nfish
     % Determine closeby fish
-    nbors = FindNeighbors(flock,jjj,R+(R/3)*(rand-.5));
+    nbors = FindNeighbors(school,jjj,R);
     Nnbors = size(nbors,1);
     
     % Calculate average velocity vector
@@ -29,6 +29,5 @@ for jjj = 1:Nfish
         update(jjj,3:4) = mean(nbors(:,3:4));
     end
 end
-update = MaxVeloEnforce(update);
 
 

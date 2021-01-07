@@ -12,39 +12,42 @@
 % Parameters for plotting
 msize = 3;
 Nframes = 1000;
-poolcolor = [210 210 255]/255;
-fishcolor = [67 93 114]/255;
+poolcolor = [220 220 255]/255;
+fishcolor = [57 73 104]/255;
 lwidth = .5;
-fishlen = .03;
+fishlen = .02;
 
 % Parameters for the school model
-M = 4;
+M = 8;
 Nfish = M^2;
 step = .01; % Maximum length of movement of each fish in each frame
-R1 = fishlen/2; % Radius for avoiding collisions, related to RULE 1
+R1 = .04; % Radius for avoiding collisions, related to RULE 1
 R2 = .2; % Radius for staying together, related to RULE 2
 R3 = .1; % Radius for aligning velocities, related to RULE 3
 noiseA = .002; % Amplitude of noise added to the flock matrix in each frame 
 
-globratio = .1;
-
 %% Build the school matrix
-% school model is a matrix containing the positions of fish
-% (first column for x-coordinates and second column for y-coordinates)
-% and the velocity vectors of fish
-% (third column for x-coordinates and fourth column for y-coordinates)
+
+% School model is a matrix containing the positions of fish and the 
+% velocity vectors of fish. Each row in the matrix represents one fish. 
+% first column:     x-coordinates of locations of fish
+% second column:    y-coordinates of locations of fish
+% third column:     x-coordinates of velocity vector of fish
+% fourth column:    y-coordinates of velocity vector of fish
 
 % Initialize locations
 t = linspace(.3,.7,M);
 [X,Y] = meshgrid(t);
 school = [X(:),Y(:),zeros(Nfish,1),zeros(Nfish,1)];
 
-% Initialize velocities
+% Initialization alternative 1: velocities as random vectors
 velmat = [2*(rand(Nfish,1)-.5),2*(rand(Nfish,1)-.5)].';
 tmp = sqrt(velmat(1,:).^2+velmat(2,:).^2);
 velmat = velmat./[tmp;tmp];
 school = MaxVeloEnforce([school(:,1:2),velmat.']);
-% school = MaxVeloEnforce([school(:,1:2),-school(:,1:2)]); %  vectors toward the origin
+
+% Initialization alternative 2: velocities as directions toward the origin
+% school = MaxVeloEnforce([school(:,1:2),-school(:,1:2)]); 
 
 
 %% Loop over frames
@@ -53,7 +56,7 @@ for iii = 1:Nframes
     
     % Update the velocity part of the school information matrix. This is
     % where the school behaviour modeling happens. 
-    school = MaxVeloEnforce(school + 1/6*(.4*FishRule1(school,R1) + FishRule2(school,R2,globratio) + FishRule3(school,R3))); 
+    school = MaxVeloEnforce(school + 1/6*(.6*FishRule1(school,R1) + FishRule2(school,R2) + FishRule3(school,R3))); 
     
     % Enforce periodic boundary conditions
     school(:,1:2) = school(:,1:2)-floor(school(:,1:2));
@@ -94,7 +97,7 @@ for iii = 1:Nframes
         school(:,2)+step*school(:,4),...
         school(:,3:4)];
     
-    % Add noise
+    % Add some random noise to both positions and velocity vectors
     school = school + noiseA*randn(size(school));
     
     disp([iii Nframes])
