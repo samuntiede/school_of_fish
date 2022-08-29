@@ -11,23 +11,23 @@
 
 % Parameters for plotting
 msize = 3;
-Nframes = 1000;
+Nframes = 2000;
 poolcolor = [220 220 255]/255;
 fishcolor = [57 73 104]/255;
 lwidth = .5;
 fishlen = .02;
 
 % Parameters for the school model
-M = 10;
+M = 12;
 Nfish = M^2;
-step = .005; % Maximum length of movement of each fish in each frame
-R1 = .1; % Radius for avoiding collisions, related to RULE 1
+step = .001; % Maximum length of movement of each fish in each frame
+R1 = .12; % Radius for avoiding collisions, related to RULE 1
 R2 = .2; % Radius for staying together, related to RULE 2
 R3 = .08; % Radius for aligning velocities, related to RULE 3
-strength_of_rule1 = 1;
+strength_of_rule1 = 1.2;
 strength_of_rule2 = 1.5;
 strength_of_rule3 = 1;
-dir_corr_coef = 1;
+dir_corr_coef = 1/2;
 noiseA = .001; % Amplitude of noise added to the flock matrix in each frame 
 
 %% Build the school matrix
@@ -57,7 +57,7 @@ school = MaxVeloEnforce([school(:,1:2),velmat.']);
 %% Loop over frames
 
 % Open video file
-videofilename = ['Fish_torus_01'];
+videofilename = ['Fish_torus_02'];
 videotype = 'MPEG-4';
 v1 = VideoWriter(videofilename,videotype);
 v1.Quality = 95;
