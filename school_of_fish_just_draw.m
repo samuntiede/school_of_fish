@@ -11,24 +11,20 @@
 
 % Parameters for plotting
 msize = 3;
-Nframes = 1000;
+Nframes = 300;
 poolcolor = [220 220 255]/255;
 fishcolor = [57 73 104]/255;
 lwidth = .5;
 fishlen = .02;
 
 % Parameters for the school model
-M = 10;
+M = 4;
 Nfish = M^2;
-step = .005; % Maximum length of movement of each fish in each frame
+step = .01; % Maximum length of movement of each fish in each frame
 R1 = .1; % Radius for avoiding collisions, related to RULE 1
-R2 = .2; % Radius for staying together, related to RULE 2
-R3 = .08; % Radius for aligning velocities, related to RULE 3
-strength_of_rule1 = 1;
-strength_of_rule2 = 1.5;
-strength_of_rule3 = 1;
-dir_corr_coef = 1;
-noiseA = .001; % Amplitude of noise added to the flock matrix in each frame 
+R2 = .1; % Radius for staying together, related to RULE 2
+R3 = .1; % Radius for aligning velocities, related to RULE 3
+noiseA = .002; % Amplitude of noise added to the flock matrix in each frame 
 
 %% Build the school matrix
 
@@ -40,7 +36,7 @@ noiseA = .001; % Amplitude of noise added to the flock matrix in each frame
 % fourth column:    y-coordinates of velocity vector of fish
 
 % Initialize locations
-t = linspace(.4,.6,M);
+t = linspace(.3,.7,M);
 [X,Y] = meshgrid(t);
 school = [X(:),Y(:),zeros(Nfish,1),zeros(Nfish,1)];
 
@@ -56,24 +52,11 @@ school = MaxVeloEnforce([school(:,1:2),velmat.']);
 
 %% Loop over frames
 
-% Open video file
-videofilename = ['Fish_torus_01'];
-videotype = 'MPEG-4';
-v1 = VideoWriter(videofilename,videotype);
-v1.Quality = 95;
-open(v1);
-
-
 for iii = 1:Nframes
     
     % Update the velocity part of the school information matrix. This is
     % where the school behaviour modeling happens. 
-    school = MaxVeloEnforce(...
-        school +... % Current directions
-        dir_corr_coef*... % Relative strentgh of rules-based direction correction
-        (strength_of_rule1*FishRule1(school,R1) + ... % Contribution of Rule 1
-        strength_of_rule2*FishRule2(school,R2) +... % Contribution of Rule 2
-        strength_of_rule3*FishRule3(school,R3))); % Contribution of Rule 3
+    school = MaxVeloEnforce(school + 1/2*(FishRule1(school,R1) + FishRule2(school,R2) + FishRule3(school,R3))); 
     
     % Enforce periodic boundary conditions
     school(:,1:2) = school(:,1:2)-floor(school(:,1:2));
@@ -108,24 +91,6 @@ for iii = 1:Nframes
     axis off
     drawnow
     
-    
-    % Initial image
-    im1 = print('-r400','-RGBImage');
-    [row,col] = size(im1(:,:,1));
-    
-    % Crop image
-    startrow = round(.12*row);
-    endrow = round(.86*row);
-    startcol = round(.07*col);
-    endcol = round(.93*col);
-    im1 = im1(startrow:endrow,startcol:endcol,:);
-    frame = imresize(im1,[1080,NaN]);
-    frame(:,[(size(frame,2)+1):1920],:) = uint8(255);
-    
-    % Add frame to video
-    writeVideo(v1,frame);   
-    
-    
     % Update positions of fish based on the velocities
     school = [...
         school(:,1)+step*school(:,3),...
@@ -137,6 +102,3 @@ for iii = 1:Nframes
     
     disp([iii Nframes])
 end
-
-close(v1);
-
